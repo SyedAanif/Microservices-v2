@@ -23,6 +23,7 @@ docker push syedaanif/ms-v2-naming-server:0.0.1-SNAPSHOT
 docker push syedaanif/ms-v2-currency-conversion-service:0.0.1-SNAPSHOT
 docker push syedaanif/ms-v2-api-gateway:0.0.1-SNAPSHOT
 ```
+[Docker Repository](https://hub.docker.com/u/syedaanif) to download images from.
 
 Kubernetes Commands
 ```
