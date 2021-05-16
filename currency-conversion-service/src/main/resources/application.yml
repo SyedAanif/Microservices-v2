@@ -1,0 +1,35 @@
+spring:
+  application:
+    name: currency-conversion-service
+  cloud:
+    config:
+      enabled: false
+  sleuth:
+    sampler:
+      probability: 1.0 # TRACE 100% REQUESTS
+
+server:
+  port: 8100
+  #port: ${random.int[8100,8110]}
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka
+  instance:
+    hostname: localhost
+    leaseRenewalIntervalInSeconds: 10
+    metadataMap:
+      instanceId: ${${eureka.instance.hostname}:${spring.application.name}:${server.port}}
+
+#UNCOMMENT FOR MONITORING KUBERNETES HEALTH AND ACTUATOR DEPENDENCY IN pom.xml
+#management:
+  # endpoint:
+    #  health:
+    #   probes:
+    #    enabled: true
+  #health:
+    # livenessState:
+    #  enabled: true
+    #readinessState:
+      # enabled: true

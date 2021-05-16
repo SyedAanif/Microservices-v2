@@ -1,0 +1,65 @@
+spring:
+  application:
+    name: currency-exchange-service
+  cloud:
+    config:
+      enabled: false
+  jpa:
+    show-sql: true
+  datasource:
+    url: jdbc:h2:mem:testdb
+  h2:
+    console:
+      enabled: true
+  sleuth:
+    sampler:
+      probability: 1.0 # TRACE 100% REQUESTS
+  zipkin:
+    baseUrl: http://localhost:9411 # LOCATION OF ZIPKIN SERVER
+
+server:
+  port: 8000
+  #port: ${random.int[8000,8002]}
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka
+  instance:
+    hostname: localhost
+    leaseRenewalIntervalInSeconds: 10
+    metadataMap:
+      instanceId: ${${eureka.instance.hostname}:${spring.application.name}:${server.port}}
+
+resilience4j:
+  retry:
+    instances:
+      sample-api: # NAME OF RETRY
+        maxAttempts: 5 # ATTEMPTS BEFORE FAILING
+        waitDuration: 1s    # DURATION BETWEEN EACH RETRY
+        enableExponentialBackoff: true # WITH EACH FAILING ATTEMPT, WAIT DURATION INCREASES
+
+  rateLimiter:
+    instances:
+      default: # NAME OF RATE LIMITER
+        limitForPeriod: 2  # NUMBER OF CALLS IN THE SPECIFIED PERIOD
+        limitRefreshPeriod: 10s  # PERIOD CONSIDERED
+
+  bulkhead:
+    instances:
+      default: # NAME OF BULK HEAD
+        maxConcurrentCalls: 10 # HOW MANY CONCURRENT CALLS CAN COME
+
+#UNCOMMENT FOR MONITORING KUBERNETES HEALTH AND ACTUATOR DEPENDENCY IN pom.xml
+#management:
+ # endpoint:
+  #  health:
+   #   probes:
+    #    enabled: true
+  #health:
+   # livenessState:
+    #  enabled: true
+    #readinessState:
+     # enabled: true
+
+

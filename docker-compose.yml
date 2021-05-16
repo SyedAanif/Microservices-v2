@@ -1,0 +1,85 @@
+version: '3.7'
+
+services:
+  currency-exchange-service: # RUNNING NAME OF MICROSERVICE
+    image: syedaanif/ms-v2-currency-exchange-service:0.0.1-SNAPSHOT # IMAGE NAME BUILT
+    mem_limit: 700m # MEMORY LIMIT
+    ports:  # EXPOSED PORTS
+      - "8000:8000"
+    networks:
+      - currency-exchange-network # NETWORK TO BE CREATED
+    depends_on:
+      - eureka-naming-server # DEPENDANT UPON WHICH MICROSERVICE, so order matters
+      - rabbitmq
+    environment: # CONFIGURE ENVIRONMENT VARIABLES BECAUSE LOCALHOST FROM DOCKER DOESN'T MEAN THE SAME
+      EUREKA.CLIENT.SERVICEURL.DEFAULTZONE: http://eureka-naming-server:8761/eureka
+      SPRING.ZIPKIN.BASEURL: http://zipkin-server:9411/
+      RABBIT_URI: amqp://guest:guest@rabbitmq:5672
+      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_ZIPKIN_SENDER_TYPE: rabbit
+
+  currency-conversion-service: # RUNNING NAME OF MICROSERVICE
+    image: syedaanif/ms-v2-currency-conversion-service:0.0.1-SNAPSHOT # IMAGE NAME BUILT
+    mem_limit: 700m # MEMORY LIMIT
+    ports: # EXPOSED PORTS
+      - "8100:8100"
+    networks:
+      - currency-exchange-network # NETWORK TO BE CREATED
+    depends_on:
+      - eureka-naming-server # DEPENDANT UPON WHICH MICROSERVICE, so order matters
+      - rabbitmq
+    environment: # CONFIGURE ENVIRONMENT VARIABLES BECAUSE LOCALHOST FROM DOCKER DOESN'T MEAN THE SAME
+      EUREKA.CLIENT.SERVICEURL.DEFAULTZONE: http://eureka-naming-server:8761/eureka
+      SPRING.ZIPKIN.BASEURL: http://zipkin-server:9411/
+      RABBIT_URI: amqp://guest:guest@rabbitmq:5672
+      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_ZIPKIN_SENDER_TYPE: rabbit
+
+  api-gateway: # RUNNING NAME OF MICROSERVICE
+    image: syedaanif/ms-v2-api-gateway:0.0.1-SNAPSHOT # IMAGE NAME BUILT
+    mem_limit: 700m # MEMORY LIMIT
+    ports: # EXPOSED PORTS
+      - "8765:8765"
+    networks:
+      - currency-exchange-network # NETWORK TO BE CREATED
+    depends_on:
+      - eureka-naming-server # DEPENDANT UPON WHICH MICROSERVICE, so order matters
+      - rabbitmq
+    environment: # CONFIGURE ENVIRONMENT VARIABLES BECAUSE LOCALHOST FROM DOCKER DOESN'T MEAN THE SAME
+      EUREKA.CLIENT.SERVICEURL.DEFAULTZONE: http://eureka-naming-server:8761/eureka
+      SPRING.ZIPKIN.BASEURL: http://zipkin-server:9411/
+      RABBIT_URI: amqp://guest:guest@rabbitmq:5672
+      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_ZIPKIN_SENDER_TYPE: rabbit
+
+  eureka-naming-server: # RUNNING NAME OF MICROSERVICE
+    image: syedaanif/ms-v2-eureka-naming-server:0.0.1-SNAPSHOT # IMAGE NAME BUILT
+    mem_limit: 700m # MEMORY LIMIT
+    ports: # EXPOSED PORTS
+      - "8761:8761"
+    networks:
+      - currency-exchange-network # NETWORK TO BE PART OF
+
+  zipkin-server: # RUNNING NAME OF MICROSERVICE
+    image: openzipkin/zipkin:2.23 # IMAGE NAME BUILT
+    mem_limit: 300m # MEMORY LIMIT
+    ports: # EXPOSED PORTS
+      - "9411:9411"
+    networks:
+      - currency-exchange-network # NETWORK TO BE PART OF
+    depends_on:
+      - rabbitmq
+    environment:
+      RABBIT_URI: amqp://guest:guest@rabbitmq:5672
+
+  rabbitmq: # RUNNING NAME OF MICROSERVICE
+    image: rabbitmq:3.5.3-management # IMAGE NAME BUILT
+    mem_limit: 300m # MEMORY LIMIT
+    ports: # EXPOSED PORTS
+      - "5672:5672"
+      - "15672:15672"
+    networks:
+      - currency-exchange-network # NETWORK TO BE PART OF
+
+networks:
+  currency-exchange-network: # NETWORK TO BE CREATED
